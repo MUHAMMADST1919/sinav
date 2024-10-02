@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600&display=swap" rel="stylesheet" />
+    <title>Spin Wheel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            height: 100vh;
+            background: linear-gradient(135deg, #4fc3f7, #1976d2);
+        }
+
+        .wrapper {
+            width: 90%;
+            max-width: 34.37em;
+            max-height: 90vh;
+            background-color: #fff;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+            padding: 3em;
+            border-radius: 1em;
+            box-shadow: 0 4em 5em rgba(27, 8, 53, 0.2);
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        #wheel {
+            max-height: inherit;
+            width: inherit;
+            top: 0;
+            padding: 0;
+        }
+
+        #spin-btn {
+            position: absolute;
+            transform: translate(-50%, -50%);
+            top: 50%;
+            left: 50%;
+            height: 26%;
+            width: 26%;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+            background: radial-gradient(#ffeb3b 50%, #f57f17 85%);
+            color: #e65100;
+            text-transform: uppercase;
+            font-size: 1.8em;
+            letter-spacing: 0.1em;
+            font-weight: 600;
+        }
+
+        img {
+            position: absolute;
+            width: 4em;
+            top: 45%;
+            right: -8%;
+        }
+
+        #final-value {
+            font-size: 1.5em;
+            text-align: center;
+            margin-top: 1.5em;
+            color: #202020;
+            font-weight: 500;
+        }
+
+        /* Modal styling */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            max-width: 500px;
+            background-color: #fff;
+            padding: 2em;
+            box-shadow: 0 4em 5em rgba(27, 8, 53, 0.2);
+            text-align: center;
+            border-radius: 1em;
+        }
+
+        .modal.active {
+            display: block;
+        }
+
+        .modal h2 {
+            margin-bottom: 1.5em;
+            font-size: 1.8em;
+            color: #4caf50;
+        }
+
+        .modal button {
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            padding: 0.7em 1.5em;
+            font-size: 1.2em;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .modal button a {
+            text-decoration: none;
+            color: #fff;
+        }
+
+        @media screen and (max-width: 768px) {
+            .wrapper {
+                font-size: 12px;
+            }
+
+            img {
+                right: -5%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <div class="container">
+            <canvas id="wheel"></canvas>
+            <button id="spin-btn">Spin</button>
+            <img src="spinner-arrow.svg" alt="">
+        </div>
+        <div id="final-value">
+            <p>Click on spin button to start</p>
+        </div>
+    </div>
+
+    <!-- Modal window -->
+    <div class="modal" id="winner-modal">
+        <h2>تبریک! شما برنده شدید!</h2>
+        <button id="claim-btn">
+            <a href="https://www.youtube.com" target="_blank">Claim</a>
+        </button>
+    </div>
+
+    <!-- Chart JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <!-- Chart JS Plugin for displaying text over chart -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.1.0/chartjs-plugin-datalabels.min.js"></script>
+    <script>
+        const wheel = document.getElementById("wheel"),
+            spinBtn = document.getElementById("spin-btn"),
+            finalValue = document.getElementById("final-value"),
+            winnerModal = document.getElementById("winner-modal");
+
+        // Values of min and max angle for different segments
+        const rotationValues = [
+            { minDegree: 0, maxDegree: 60, value: "1TON" },
+            { minDegree: 61, maxDegree: 120, value: "15$" },
+            { minDegree: 121, maxDegree: 180, value: "5000DOGS" },
+            { minDegree: 181, maxDegree: 240, value: "10TON" },
+            { minDegree: 241, maxDegree: 300, value: "10000DOGS" },
+            { minDegree: 301, maxDegree: 360, value: "20TON" }
+        ];
+
+        // Size of pieces
+        const data = [16, 16, 16, 16, 16, 16];
+
+        // Background color of pieces
+        var pieColors = [
+            "#ff5722",
+            "#4caf50",
+            "#f44336",
+            "#2196f3",
+            "#ffeb3b",
+            "#9c27b0"
+        ];
+
+        // Create the pie chart for the wheel
+        let myChart = new Chart(wheel, {
+            plugins: [ChartDataLabels],
+            type: "pie",
+            data: {
+                labels: ["1TON", "15$", "5k DOGS", "10TON", "10k DOGS", "20TON"],
+                datasets: [
+                    {
+                        backgroundColor: pieColors,
+                        data: data,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                animation: { duration: 0 },
+                plugins: {
+                    tooltip: false,
+                    legend: { display: false },
+                    datalabels: {
+                        color: "#ffffff",
+                        formatter: (_, context) => context.chart.data.labels[context.dataIndex],
+                        font: { size: 16 },
+                    },
+                },
+            },
+        });
+
+        // Function to display the result in modal
+        const valueGenerator = (angleValue) => {
+            let result = rotationValues.find(entry => angleValue >= entry.minDegree && angleValue <= entry.maxDegree);
+            finalValue.innerHTML = `<p>Congratulations! You won ${result.value}!</p>`;
+            winnerModal.classList.add('active');
+            spinBtn.disabled = false;
+        };
+
+        // Spinner count and rotation value
+        let count = 0;
+        let resultValue = 25;
+
+        // Start spinning
+        spinBtn.addEventListener("click", () => {
+            spinBtn.disabled = true;
+            winnerModal.classList.remove('active');
+            finalValue.innerHTML = `<p>Good Luck!</p>`;
+            // Random angle to land on a prize
+            let randomDegree = Math.floor(Math.random() * (360 - 0 + 1) + 0);
+
+            let rotationInterval = window.setInterval(() => {
+                myChart.options.rotation = myChart.options.rotation + resultValue;
+                myChart.update();
+
+                if (myChart.options.rotation >= 360) {
+                    count += 1;
+                    resultValue -= 1;
+                    myChart.options.rotation = 0;
+                } else if (count > 15 && myChart.options.rotation == randomDegree) {
+                    valueGenerator(randomDegree);
+                    clearInterval(rotationInterval);
+                    count = 0;
+                    resultValue = 25;
+                }
+            }, 10);
+        });
+    </script>
+</body>
+
+</html>
