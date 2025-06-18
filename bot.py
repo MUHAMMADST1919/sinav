@@ -2,7 +2,7 @@ from telegram import Update
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
 # توکن ربات خود را اینجا قرار دهید
-TOKEN = "YOUR_TELEGRAM_BOT_TOKEN"
+TOKEN = "8134642085:AAENQq7H75vspwNzRamuVJuLCux3jNCkBwM"
 
 def start(update: Update, context: CallbackContext) -> None:
     """ارسال پیام خوش‌آمدگویی وقتی کاربر دستور /start را می‌فرستد"""
